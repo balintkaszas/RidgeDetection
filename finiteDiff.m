@@ -16,8 +16,6 @@ smoothFT = FF(:,:,1);
 
 
 
-%surf(xi,yi,FF(:,:,1));shading interp; axis equal;axis tight;colorbar;
-%view([0 0 1]); axis equal; axis tight; shading interp;camlight
 
 [fx,fy] = gradient(smoothFT, difference);
 %imagesc(domain(:,1), domain(:,2), fx);
@@ -29,11 +27,18 @@ eigenvalsSmall = 0.5*(fxx + fyy - sqrt(fxx.^2 + 4. * fxy.^2 - 2.*fxx.*fyy + fyy.
 eigenvectorx = fyy - eigenvalsSmall;
 eigenvectory = fyx;
 magnitudes = sqrt(fx.^2 + fy.^2);
+hold on;
+ix = find(imregionalmax(smoothFT));
+imagesc(domain(1,:), domain(2,:), smoothFT);
 
-
-
+% surf(xi,yi,FF(:,:,1));shading interp; axis equal;axis tight;colorbar;
+% view([0 0 1]); axis equal; axis tight; shading interp;camlight
+plot(xi(ix),yi(ix), 'r*','MarkerSize',24)
 %imagesc(domain(1,:), domain(2,:), eigenvalsSmall);
-mask = magnitudes > max(magnitudes, [], 'all')*0.9;
+
+mask2 = eigenvalsBIG <0;
+%imagesc(mask2);
+%mask = magnitudes > max(magnitudes, [], 'all')*0.9;
 %magnitudes = sqrt(fx.^2 + fy.^2);
 %disp(min(magnitudes, [], 'all'));
 %surf(xi,yi,magnitudes);shading interp; axis equal;axis tight;colorbar;
@@ -86,10 +91,11 @@ y = X(2);
 
 eigenvec = [eigenvectorxSmallInterp(x,y), eigenvectorySmallInterp(x,y)];
 gradie = [fxInterp(x,y), fyInterp(x,y)];
-disp(eigenvalueSmallInterp(x,y));
-disp(dot(gradie,eigenvec)/(norm(gradie)*norm(eigenvec)));
-
-value      = (eigenvalueSmallInterp(x,y) > 0. ) && ( abs(dot(gradie,eigenvec)/(norm(gradie)*norm(eigenvec))-1.) > 1e-2);
+%disp(eigenvalueSmallInterp(x,y));
+%disp(dot(gradie,eigenvec)/(norm(gradie)*norm(eigenvec)));
+angle = dot(gradie,eigenvec)/(norm(gradie)*norm(eigenvec));
+value      = (eigenvalueSmallInterp(x,y) > 0. ) && ( abs(angle-prevangle) > 1e-5);
+prevangle = angle;
 isterminal = 1;   % Stop the integration
 direction  = 0;
 end

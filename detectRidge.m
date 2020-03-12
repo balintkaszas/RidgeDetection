@@ -27,7 +27,7 @@ function [x,y] = detectRidge(scalarField, resolution, domain)
 
     %calculate rotation angles: 
     cosb = sqrt(0.5 * (1 + (Lxx - Lyy)./detShapeOp));
-    sinb = sqrt(0.5 * (1 - (Lxx - Lyy)./detShapeOp));
+    sinb = sign(Lxy).*sqrt(0.5 * (1 - (Lxx - Lyy)./detShapeOp));
 
     %calculate directional derivatives
     Lp = sinb.*Lx - cosb.*Ly;
@@ -44,7 +44,9 @@ function [x,y] = detectRidge(scalarField, resolution, domain)
     Lpp = Lpp';
     %interpolants
     Lppinterp = griddedInterpolant(xi,yi,Lpp, 'linear');
-    ridgeMask = Lppinterp(xCandidate, yCandidate) < 0; %% ridge mask satisfying two conditions
+    Lqqinterp = griddedInterpolant(xi,yi,Lqq, 'linear');
+
+    ridgeMask = (Lppinterp(xCandidate, yCandidate) < 0) & (abs(Lppinterp(xCandidate, yCandidate)) >= abs(Lqqinterp(xCandidate, yCandidate))); %% ridge mask satisfying two conditions
     x = xCandidate(ridgeMask);
     y = yCandidate(ridgeMask);
     
